@@ -42,19 +42,19 @@ vector_adding <- c(bazi_sayilar, num3to20, 4:1) #
 vector_adding
 
 
-#vektörün 3, 6, 7. üyelerini bas
+#vekt?r?n 3, 6, 7. ?yelerini bas
 bazi_sayilar[c(3,6,7)]
 
-#vektörün 3,4,5,6,7. üyelerini bas
+#vekt?r?n 3,4,5,6,7. ?yelerini bas
 num3to20[3:7]
 
-#x. deger hariç
+#x. deger hari?
 num3to20[-1]
 
-#belli araligi almamasi için
+#belli araligi almamasi i?in
 num3to20[-(1:3)]
 
-#y'yi 3 ile çarp ama y'yi etkileme
+#y'yi 3 ile ?arp ama y'yi etkileme
 y <- c(0, 7, 8)
 y*3
 
@@ -72,12 +72,12 @@ f <- 1:50
 
 d+e
 
-# boyutlar ayni degilse küçügü boyutunda kaydirarak toplar
+# boyutlar ayni degilse k???g? boyutunda kaydirarak toplar
 d+f
 
 d*e
 
-# kaydirarak çarpar küçük olanin rakamlarini büyük olandakinin sirasiyla tekrarlar sliding
+# kaydirarak ?arpar k???k olanin rakamlarini b?y?k olandakinin sirasiyla tekrarlar sliding
 d*f
 
 #ardisik sayilar 1,3,5, ..., 21
@@ -86,7 +86,7 @@ seq(1, 21, by =2)
 #x i n kez bas rep(3,10)
 rep(3, 10)
 
-#paterne göre sayi bastir 2 den 20 ye kadar ardisik sayilari 3 kez bastir
+#paterne g?re sayi bastir 2 den 20 ye kadar ardisik sayilari 3 kez bastir
 rep(seq(2,20, by = 2), 5)
 
 #her bir elemani ayri ayri sirali bastirmak
@@ -95,7 +95,7 @@ rep(c(1,4), each =3)
 sort(rep(seq(2,20, by = 2 ), 3))
 
 
-#bos vektör
+#bos vekt?r
 bazi.cift <- NULL
 bazi.cift
 
@@ -107,7 +107,7 @@ x <- c( 0, 7,8)
 x/x  #NaN
 1/x  #Inf
 
-#karakter vektörleri
+#karakter vekt?rleri
 
 colours <- c("red", "yellow", "blue")
 colours
@@ -119,7 +119,7 @@ more.colours
 z <- c("red", "green", 1)
 z
 
-#her üyein 2 ve 3. karakterini al
+#her ?yein 2 ve 3. karakterini al
 substr(colours, 2, 3)
 
 #"red  flowers"    "yellow  flowers" "blue  flowers" 
@@ -132,14 +132,15 @@ paste("several ", colours, "s", sep ="")
 paste("I like ", colours , collapse=", ")
 
 
-#morecolours in 2 ve 5. üyeleri
+#morecolours in 2 ve 5. ?yeleri
 more.colours[c(2,5)]
 
-#morecolours in 2 ve 5 arasi üyeleri
+#morecolours in 2 ve 5 arasi ?yeleri
 more.colours[c(2:5)]
 
 
 #bazi.cift te NA-bos var mi?
 is.na(bazi.cift)
+
 
 
