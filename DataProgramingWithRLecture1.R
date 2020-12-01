@@ -33,8 +33,8 @@ var(x)
 max(x)
 
 #R is case sensitive
-Kök <- sqrt
-Kök(16)
+K?k <- sqrt
+K?k(16)
 
 a <- "R is a good language"
 a
@@ -50,7 +50,7 @@ objects()
 help(mean)
 
 #using packages from library
-install.packages("gsstat")
+install.packages("gstat")
 library(gstat)
 #detach package
 detach("package:gstat", unload = TRUE)
