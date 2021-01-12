@@ -1,0 +1,286 @@
+---
+title: "GGPLOT2"
+author: "Ahmet ÇETİNKAYA 6006049"
+date: "10/01/2021"
+output:
+  word_document: default
+  html_document: default
+---
+#Isı haritası fonksiyonu geom_tile() ile genel grafik çizimi
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Öncelikle ggplot kütüphanesini yüklüyoruz
+
+```{r mtcars}
+library(ggplot2)
+# melt()fonksiyonu için reshape2 kütüphanesini yükle
+#install.packages("reshape2")
+library(reshape2)
+```
+Sonra mtcars verisetini yükleyip içeriğini View fonksiyonu ile görelim
+```{r }
+data("mtcars")
+View(mtcars)
+head(mtcars)
+```
+Isı haritası oluşturmak için en az 3 değişkene ihtriyacımız bulunmaktadır. Bunun için reshape2 kütüphanesinden melt fonksiyonu ile 32 satır 11 sütundan oluşan verisetimizi 2 sütunlu 32x11 satırlı araba_verisi isimli dataframe'e dönüştürelim. Burada sütun isimleri varsayılan olarak variable-value olarak gelmektedir.:
+```{r }
+# melt fonksiyonu degişkenleri 2 sütuna ayırır değişken adı ve değeri
+araba_verisi <- melt(mtcars)
+View(araba_verisi)
+head(araba_verisi)
+```
+
+Araba verisi dataframe'inde değişken olarak bulunmayan ve satır adı olarak yer alan araç adlarını 3. sütunda "araba" olarak ekleyelim.replicate(veri, tekrar) fonksiyonu ile her variable için 32 araç adını sütunlara ekleyelim.Tekrar sayısı 11 olacaktır.
+
+```{r}
+araba_verisi$araba <-rep(row.names(mtcars),11)
+View(araba_verisi)
+head(araba_verisi)
+```
+
+melt fonksiyonunda sütun adları varsayılan olarak variable-value olarak gelmektedir. Bu yüzden Dataframe sütun(değişken) adlarını anlaşılır duruma getirmek için colnames()fonksiyonunu kullanalım :
+
+```{r }
+colnames(araba_verisi) = c("ozellikler", "deger", "araba")
+View(araba_verisi)
+head(araba_verisi)
+```
+
+Isı haritasında düşük değerli değişkenler için mavi, yüksek değerli değişkenler için koyukırmızı rengini kullanacağımızı belirtelim:
+
+
+```{r }
+# ısı haritasında düşük değerler için mavi yüksek değerler için kırmızı göster
+dusukRenk = "white"
+yuksekRenk = "darkred"
+```
+
+Veri hazırlama süreci tamamlanmış olup adım adım ggplot ile grafik çizme işlemine başlayalım. ggplot(data) fonksiyonu ile verisetimizi ggplot a aktaralım:
+
+```{r }
+# ggplot() a veriyi yükle
+ggplot(araba_verisi)
+```
+
+Yukarıda görüldüğü gibi ggplot boş bir şekilde ilk görseli oluşturdu. Şimdi aynı satırda ggplot(df, aes(x, y, other aesthetics))fonkisyonunun diğer çözellikllerinden olan x ekseninde verisetinin "ozellikler" sütununun ve y ekseninde "araba" sütununun verisini göstererek eksenleri çizelim:
+
+
+```{r }
+# heatmap çizimi eksenleri ve değişkenleri çiz
+ggplot(araba_verisi, aes(x = ozellikler, y = araba))
+```
+
+geom_tile fonksiyonu aşağıdaki özelliklere(değişken adlarına) sahiptir: geom_tile( mapping = NULL, data = NULL, stat = "identity", position = "identity", ..., linejoin = "mitre", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE )
+
+Estetik özellikleri ise, x, y ,alpha, colour, fill, group, height, linetype, size, ve width tir. Tile sözlük anlamı olarak fayans demektir. geom_tile() fonksiyonu fayansın merkezini kullanır ve genişlik ile yüksekliğini ayarlar.Estetik özelliklerinden Sadece dolgu değerini(fill) kullanarak ve verisetinin sadece "deger" sütununu dikkate alacak şekilde dikdörtgenleri default renklerinde boyanacak şekilde oluşturalım:
+
+```{r }
+ggplot(araba_verisi, aes(ozellikler, araba)) + 
+  geom_tile(aes(fill = deger))
+```
+
+Düşük değerli özellikler için koyu, yüksek değerli özellikler için açık renkli ısı haritasını oluşturmuş bulunmaktayız. Bİr sonraki adımımızda bu dükdörtgenleri default değerler yerine, yukarıda tanımladığımız dusukRenk ve buyukRenk değişkenleri ile boyayalım. Bunun için ggplot scale_colour_continuous ölçeklendirme fonksiyonlarından olan scale_fill_continuous() fonksiyonunu kullanalım:
+
+
+```{r }
+ggplot(araba_verisi, aes(ozellikler, araba)) + 
+  geom_tile(aes(fill = deger)) +
+  scale_fill_continuous(low = dusukRenk, high = yuksekRenk)
+```
+Kendi tasarımımıza uygun olacak şekilde yüksek değerli özellikler kırmızı, düşük değerli özellikler beyaz olacak şekilde 32x11 adet araç özelliğini görselleştirdik.
+
+Ancak sadece renk olarak görmekteyiz. Her plot(değişken/fayans) değerini içine yazmak için ggplot kütüphanesinin geom_label sınıfından geom_text() fonksiyonunu kullanıp label'ına verisetimizdeki "deger" sütun değerini atayalım:
+
+
+```{r }
+# her kutunun değerini yaz
+ggplot(araba_verisi, aes(ozellikler, araba)) + 
+  geom_tile(aes(fill = deger)) +
+  scale_fill_continuous(low = dusukRenk, high = yuksekRenk) +
+  geom_text(aes(label = deger)) 
+```
+Böylece her özelliğin ısı haritasının yanı sıra değerlerini de görmekteyiz.
+
+Bir sonraki adımımız grafiğin açıklayıcı başlıklarının yazılması olacaktır. Bunu ggplot kütüphanesinde eksen, başlık ve çizim başlıklarını değiştirmek için geliştirilmiş olan labs() fonksiyonu ile gerçekleştirelim:
+
+
+
+```{r }
+ggplot(araba_verisi, aes(ozellikler, araba)) + 
+  geom_tile(aes(fill = deger)) +
+  scale_fill_continuous(low = dusukRenk, high = yuksekRenk) +
+  geom_text(aes(label = deger)) +
+  labs(x = "Arabaların Özellikleri", y = "Araba Modeli", 
+       title = "mtcars Isı Haritası",
+       subtitle = "Örnek ısı haritası grafiğidir",
+       caption = "Veri seti: mtcar")
+```
+
+labs(x = "Arabaların Özellikleri", y = "Araba Modeli", title = "mtcars Isı Haritası", subtitle = "Örnek ısı haritası grafiğidir", caption = "Veri seti: mtcar") fonksiyonunda x ekseninin etiketini veriseti değişken adı(sütun adı) olan "ozellikler" yerine x = "Arabaların Özellikleri" ataması ile daha açıklayıcı bir etikete dönüştürdük. aynı şekilde y ekseninin etiketini de veriseti değişken adı(sütun adı) olan "araba" yerine y = "Araba Modeli" ataması ile değiştirdik. Ana başlık olarak title = "mtcars Isı Haritası" ataması ile, hemen altındanki alt başlık için ise subtitle = "Örnek ısı haritası grafiğidir" ataması ile etiket oluşturduk. Sayfanın altında genellikle kaynak bilgilerini belirtmek için kullanılan caption alanını ise caption = "Veri seti: mtcar" ataması ile etiketlendirdik.
+
+ggplot ile grafik çiziminde bir sonraki adım tema seçimi ve etiket renklendirmesidir. ggplot kütüphanesinin içinde bulunan ggtheme() tema grubu ile veri içermeyen görüntüler kontrol edilir.Temaların varsayılan özelliklerinden birisi aşağıdaki gibidir.
+
+theme_light( base_size = 11, base_family = "", base_line_size = base_size/22, base_rect_size = base_size/22 )
+
+theme_ sonrasında ctrl+space tuşlarına basılarak istenen tema grafiğe eklenir.theme_light seçelim. Bir önceki kod parçacığında yazmış olduğumuz etiketlerin renk, kalınlık gibi özelliklerini temaya ait olan şekillendirme özellikleriyle gerçekleştirebiliriz.Tema elemanlarını içeren margin grubu fonksiyonlarından element_text kullanacağız. plot.title = element_text(color = "red", face = "bold") ile ana başlık(title) etiketinin rengini(color) kırmızı, görünümünü(face) kalın yapalım. Aynı şekilde alt başlık(subtitle) rengi mavi olsun, caption kırmızı ve italik olsun.
+
+element_text( family = NULL, face = NULL, colour = NULL, size = NULL, hjust = NULL, vjust = NULL, angle = NULL, lineheight = NULL, color = NULL, margin = NULL, debug = NULL, inherit.blank = FALSE )
+
+
+```{r }
+ggplot(araba_verisi, aes(ozellikler, araba)) + 
+  geom_tile(aes(fill = deger)) +
+  scale_fill_continuous(low = dusukRenk, high = yuksekRenk) +
+  geom_text(aes(label = deger)) +
+  labs(x = "Arabaların Özellikleri", y = "Araba Modeli", 
+       title = "mtcars Isı Haritası",
+       subtitle = "Örnek ısı haritası grafiğidir",
+       caption = "Veri seti: mtcar") +
+  theme_light() +
+  theme(
+    plot.title = element_text(color = "red", face = "bold"),
+    plot.subtitle = element_text(color = "blue"),
+    plot.caption = element_text(color = "brown",  face = "italic"))
+```
+
+Bazı durumlarda eksenlerde bulunan değişken isimleri uzun olmakta ve varsayılan olarak yatay gösterilmesi durumda bir sonraki değişken adı ile içi içe girebilmektedir. Bunu engellemek için tema grubuna ait element_text in angle özelliğini kullanacağız:
+
+```{r }
+ggplot(araba_verisi, aes(ozellikler, araba)) + 
+  geom_tile(aes(fill = deger)) +
+  scale_fill_continuous(low = dusukRenk, high = yuksekRenk) +
+  geom_text(aes(label = deger)) +
+  labs(x = "Arabaların Özellikleri", y = "Araba Modeli", 
+       title = "mtcars Isı Haritası",
+       subtitle = "Örnek ısı haritası grafiğidir",
+       caption = "Veri seti: mtcar") +
+  theme_light() +
+  theme(
+    plot.title = element_text(color = "red", face = "bold"),
+    plot.subtitle = element_text(color = "blue"),
+    plot.caption = element_text(color = "brown",  face = "italic"))+
+  theme(axis.text.x=element_text(angle=90)) 
+```
+
+x eksenindeki değişken adları 90 derece açı ile dik olarak yerleştirildi.
+
+Böylelikle ggplot ile grammar of graphics kurallarına uyarak grafiğimizi tamamladık. Son adım olarak ggsave fonksiyonu ile grafiğimizi değişik formatlarda kaydedebiliriz.
+
+```{r }
+ggsave("p_arabagrafigi.png")
+ggsave("p_arabagrafigi.pdf")
+ggsave("p_arabagrafigi.jpg")
+```
+
+#Coord_sf() grubu fonksiyonları ile ilgili İzmir haritası uygulaması
+
+Bu uygulamada ggplot2 küytüphanesi Coord_sf grubu fonkisyonları kullanılarak nokta ve çizgilerle harita çizimi yapacağız. Bunun için kullanımı serbest ve açık lisans altında olan, dünyadaki tüm şehirler için veri içeren openstreetmaps sitesinden veri alacağız.
+
+Öncelikle openstreetmaps sitesinin REST servislerinden veri almak için osmdata kütüphanesini yükleyeceğiz. Ayrıca ggplot2 kütüphanesi sf fonksiyonları bazı durumlarda hata verdiği için bunu engellemek üzere sf paketini de yüklememiz gerekmektedir.
+
+```{r }
+#install.packages("osmdata")
+#install.packages("sf")
+library(osmdata)
+library(ggplot2)
+```
+
+osmdata kütüphanesindeki available_features() fonskiyonu ile sitenin sunduğu ana grupları görebiliriz.
+
+```{r }
+View(available_features())
+head(available_features())
+```
+
+Bu ana grubun altında yer alan grupları görmek için available_tags(anagrupadı) ile hangi alt-grup bilgilerini verdiğini görebiliriz. shop ana grubu altında kuyumcu, restoran vb. alt başlıklara ulaşabiliriz.
+
+```{r }
+View(available_tags("shop"))
+head(available_tags("shop"))
+```
+
+İstediğimiz şehrin geometrik bilgilerini OSM APIdan getbb("şehiradı") ile elde edip sonrasında istediğimiz nokta-çizgi bilgilerine openstreetmaps OSM Overpass API üzerinden key-value pair olarak ulaşabiliriz. İzmirin sokakları, kuyumcuları ve metro istasyonlarını çizmek için talep(request) gönderdiğimizde sokaklar için çizgi ve nokta metro istasyonu ve kuyumcular için ise nokta olarak bize konum bilgilerini gönderecektir:
+
+```{r }
+# getbb getboundingbox-> sehri seç x:boylam(longitude) y:enlem(latitude)
+# [bbox:south,west,north,east]
+izmir <- getbb("Izmir")
+izmir
+
+# izmirin uç koordinatlarını adlandır.
+bati <- izmir[1,1]
+dogu <- izmir[1,2]
+guney <- izmir[2,1]
+kuzey <- izmir[2,2]
+
+sokaklar <- izmir %>%
+  opq()%>%
+  add_osm_feature(key = "highway", 
+                  value = c("motorway", "primary", 
+                            "secondary", "tertiary")) %>%
+  osmdata_sf()
+
+# sokak bilgilerini göster
+sokaklar
+
+# izmirdeki kuyumcularin noktalarını belirle
+kuyumcu <- izmir %>%
+  opq()%>%
+  add_osm_feature(key = "shop", 
+                  value = c("jewelry")) %>%
+  osmdata_sf()
+
+kuyumcu
+
+# izmirdeki metro istasyonlarının noktalarını belirle 
+metro_istasyonlari <- izmir %>%
+  opq()%>%
+  add_osm_feature(key = "station", 
+                  value = c("subway")) %>%
+  osmdata_sf()
+metro_istasyonlari
+```
+
+Sokakları çizgi ile göstermek için ggplot2 kütüphanesi Coord_sf grubu fonskiyonlardan geom_sf() ve coord_sf() fonksiyonlarını kullanalım.
+geom_sf() fonksiyonunda veri, üst grubu miras alma, renk,boyut ve şeffaflık için alfa gibi değişkenler bulunmaktadır. 
+
+```{r }
+  ggplot() +
+    geom_sf(data = sokaklar$osm_lines,
+            inherit.aes = FALSE,
+            color = "gray",
+            size = .6,
+            alpha = .6)
+```
+
+coord_sf() fonksiyonu ise xlim = batı-doğu koordinatları yatay eksende, ylim =güney-kuzey koordinatları dikey eksende olacak şekilde alır. expand haritanın büyütülmesi ile ilgilidir.
+
+Aynı şekilde kuyumcu ve metro bilgilerini de OSMden alıp Coord_sf fonksiyonlarımıza veri olarak girerek ggplot ile haritayı çizdirelim.
+
+
+```{r }
+  ggplot() +
+    geom_sf(data = sokaklar$osm_lines,
+            inherit.aes = FALSE,
+            color = "gray",
+            size = .6,
+            alpha = .6) +
+    geom_sf(data = kuyumcu$osm_points,
+            inherit.aes = FALSE,
+            color = "blue",
+            size = 1,
+            alpha = .8) +
+    geom_sf(data = metro_istasyonlari$osm_points,
+            inherit.aes = FALSE,
+            color = "red",
+            size = 1.2,
+            alpha = 1) +
+    coord_sf(xlim = c(bati, dogu), 
+             ylim = c(guney, kuzey),
+             expand = FALSE) 
+```
+
