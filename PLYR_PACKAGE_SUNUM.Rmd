@@ -1,0 +1,644 @@
+---
+title: "PLYR PACKAGE SUNUM"
+output: html_document
+authors: Erkan Çetinyamaç & Osman Ali Yardım
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*********************** PLYR PACKAGE SUNUMU ******************************
+
+######################## 1. Kısım - Erkan Çetinyamaç #######################
+
+```{r}
+#kütüphane
+
+library(plyr)
+
+
+#dataframe
+
+df<- avocado
+
+df
+
+#plyr paketi numerik değişken odaklı olduğu için kategorik değişkenleri dfden çıkarıyoruz.
+
+
+df$X1<- NULL
+df$Date<- NULL
+df$type<- NULL
+df$region<- NULL
+
+
+
+colnames(df)[colnames(df) == 'Total Volume'] <- 'Total_Volume'
+colnames(df)[colnames(df) == 'Total Bags'] <- 'Total_Bags'
+colnames(df)[colnames(df) == 'Large Bags'] <- 'Large_Bags'
+colnames(df)[colnames(df) == 'Small Bags'] <- 'Small_Bags'
+colnames(df)[colnames(df) == 'XLarge Bags'] <- 'XLarge_Bags'
+
+
+df_test <- head(df,10)  
+
+test_m <- cbind(c(1,2,3),c(3,4,5),c(6,7,8))
+
+test_vec <- c(1,2,3,4,5,6,7,8)
+
+
+
+
+
+
+
+```
+
+aaply fonksiyonu dataframe'in her bir satır veya stununa istenilen fonksiyonu uygular.
+
+```{r}
+#aaply
+
+aaply (df, 2, max)
+
+
+kareAl <- function(x) {  
+    x*x  
+    } 
+
+data_1 <- aaply (df_test,c(1,2),kareAl)
+
+data_1
+
+```
+
+adply, aaply ile aynı görevi görür sadece outputu dataframe olarak döndürür.
+
+```{r}
+
+
+data_2 <- adply(df,2,min)
+
+class(data_1)
+
+class(data_2)
+
+```
+
+alply, yine aynı görevde sadece outputu liste olarak döndürür.
+
+```{r}
+
+data_3 <- alply (df, 2 , sum)
+
+data_3
+
+class(data_3)
+
+
+```
+arrange()  & desc()
+
+desc : Bir vektörü, azalan düzende sıralanacak bir formata dönüştürür.Bu fonksiyon arrange() fonksiyonu ile birlikte kullanıldığında kullanışlı hale gelir ve birbirlerini tamamlar.
+
+```{r}
+
+data_4<-arrange(df,df$AveragePrice)
+
+data_4
+
+data_5<-arrange(df,desc(df$AveragePrice))
+
+data_5
+
+
+
+```
+
+
+as.data.frame fonksiyonu girilen inputu dataframe şeklinde çıktı verir.
+
+```{r}
+
+test_matrix<- cbind(c(1,2,3),c(2,3,4),c(5,8,9))
+
+class(test_matrix)
+
+test_matrix<- as.data.frame(test_matrix)
+
+class(test_matrix)
+```
+
+as.quoted fonksiyonu girilen inputun bir formül veya karakter belirttiğini ve normal bir değişken olarak algılanmaması gerektiği durumlarda kullanılır.
+
+```{r}
+
+data_6<- as.quoted(a ~ b + log(a+b))
+
+data_6
+```
+
+
+a_ply: array, dataframe yada matrixin satır veya stununa istenilen fonksiyonu uygular ama değişiklikler kaydedilemez.
+
+```{r}
+
+data_7<- a_ply(df,2,sum)
+
+class(data_7)
+
+
+```
+
+colwise fonksiyonu vektör bazında yani satır bazında çalışan bir fonksiyonu sütün bazında çalışmasına olanak tanır.
+
+```{r}
+
+eksik <- function(x){ 
+    sum(is.na(x))
+    }
+
+df_test[8,2]<-NA
+
+eksik(df_test)
+
+colwise(eksik)(df_test) 
+
+
+```
+count, dfden seçtiğimiz bir etiket için bulunan gözlemlerin sayısını
+döndürür.
+
+```{r}
+
+count(df, vars =  "year")
+
+```
+
+create_progress_bar : progress bar oluştur. bir komutun bitiş süresi hakkında feedback almamızı sağlar.
+
+```{r}
+
+
+create_progress_bar(name = "win")
+
+daply(df,"Total_Volume",frequency,.progress = "win")
+
+
+```
+
+daply sütun bazında istenen fonksiyonu uygular. Diğer türevlerinden farkı outputu array olarak döndürmesi ve sadece stün bazında çalışmasıdır.
+
+```{r}
+
+
+data_8<- daply(.data = df,.variables = .(year),.fun = nrow)
+
+data_8
+
+
+```
+
+ddply, daply ile aynı görevde sadece outputu dataframe olarak döndürür.
+
+```{r}
+
+data_9<- ddply(.data = df,.variables = .(year),.fun = nrow)
+
+data_9
+
+```
+
+dlply, yine aynı görevde output liste.
+
+```{r}
+
+data_10<- ddply(.data = df,.variables = .(year),.fun = nrow)
+
+is.list(data_10)
+
+
+```
+
+d_ply: aynı görev fakat çıktıyı discard eder. çıktıyı kaydetmez.
+
+```{r}
+
+data_11<- d_ply(.data = df,.variables = .(year),.fun = nrow)
+
+data_11
+
+```
+
+
+
+each:  birden fazla fonksiyonu tek bir fonksiyon içinde kümeleyerek çalıştırmak için kullanıyor.
+
+```{r}
+
+each(min, max, sum)(df$AveragePrice)
+
+
+```
+
+failwith : Bir hata oluştuğunda döndürülecek hata mesajını ayarlamak.
+
+```{r}
+# f <- function(x) if (x == 1) stop("Error!") else 10
+# 
+# f(1)
+# 
+# f(2)
+# 
+# 
+# safef <- failwith(default = " hata mesajı !!!", f)
+# 
+# safef(1)
+
+
+```
+
+join, İki dataframe'i birleştirip tek bir dataframe oluşturur.
+
+
+```{r}
+
+df1<-head(df,10)
+
+df2<- tail(df,10)
+
+df3<- join(df1, df2, by = NULL, type = "full", match = "all")
+
+df3
+
+dim(df3)
+
+
+```
+join_all ise ikiden fazla dataframe'i birleştirebilir. İnput olarak liste formatı ister.
+
+```{r}
+
+df3<- tail (df,100)
+df4<- head (df,100)
+
+DFs<- list (df1,df2,df3,df4)
+
+
+df5<- join_all (DFs,type = "full", match = "all")
+
+df5
+
+```
+
+
+
+
+
+
+######################## 2. Kısım - Osman Ali Yardım #######################
+
+
+
+
+
+
+```{r}
+#For each element of a list, apply function, keeping results as a list.
+help(llply)
+
+df_test
+
+llply(
+.data = df_test,
+.fun = max,
+.progress = "text"
+)
+```
+
+```{r}
+#For each element of a list, apply function and discard results
+help(l_ply)
+
+LLPLY_LIST = llply(df_test, round)
+
+l_ply(LLPLY_LIST, table, .print = TRUE)
+```
+
+```{r}
+#Replace specified values with new values, in a vector or factor.
+help(mapvalues)
+
+x <- c("a", "b", "c")
+
+x
+
+mapvalues(x, c("b", "c"), c("Z", "C"))
+
+# Works on factors
+y <- factor(c("a", "b", "c", "a"))
+mapvalues(y, c("a", "c"), c("A", "C"))
+
+# Works on numeric vectors
+z <- c(1, 4, 5, 9)
+mapvalues(z, from = c(1, 5, 9), to = c(10, 50, 90))
+```
+
+```{r}
+#Extract matching rows of a data frame.
+help(match_df)
+
+dfx <- avocado
+
+dfx$Date<-NULL
+dfx$type<-NULL
+dfx$region<-NULL
+
+colnames(dfx)[colnames(dfx) == 'X1'] <- 'id'
+
+# count the occurrences of each id in the dataframe, then get the subset with a freq > 25
+sb <- subset(count(dfx, "id"), freq > 25)
+
+bb_sb <- match_df(dfx, sb, on="id")
+bb_sb[1:5,]
+```
+
+```{r}
+#Call function with arguments in array or data frame, returning an array.
+help(maply)
+
+mtrx = cbind(mean = 1:5, sd = 1:5)
+
+mtrx
+
+maply(mtrx, rnorm, n = 5)
+```
+
+```{r}
+#Call function with arguments in array or data frame, returning a data frame.
+help(mdply)
+
+mtrx = cbind(mean = 1:5, sd = 1:5)
+
+mtrx
+
+mdply(mtrx, rnorm, n = 5)
+```
+
+```{r}
+#Call function with arguments in array or data frame, returning a list.
+help(mlply)
+
+mtrx = cbind(mean = 1:5, sd = 1:5)
+
+mtrx
+
+mlply(mtrx, rnorm, n = 5)
+```
+
+```{r}
+#Call function with arguments in array or data frame, discarding results.
+help(m_ply)
+
+mtrx = cbind(mean = 1:5, sd = 1:5)
+
+mtrx
+
+m_ply(mtrx, rnorm, n = 5)
+```
+
+```{r}
+#Mutate a data frame by adding new or replacing existing columns.
+help(mutate)
+
+airquality
+
+mutate(airquality, Ozone = -Ozone)
+mutate(airquality, new = -Ozone, Temp = (Temp - 32) / 1.8)
+```
+
+```{r}
+#Toggle row names between explicit and implicit.
+help(name_rows)
+
+mtcars
+
+name_rows(mtcars)
+name_rows(name_rows(mtcars))
+```
+
+```{r}
+help(progress_text)
+
+l_ply(1:100, identity, .progress = "text")
+l_ply(1:100, identity, .progress = progress_text(char = "-"))
+```
+
+```{r}
+#Text progress bar with time.
+help(progress_time)
+
+l_ply(1:100, function(x) Sys.sleep(.01), .progress = "time")
+```
+
+```{r}
+#Graphical progress bar, powered by TK.
+help(progress_tk)
+
+l_ply(1:10000, identity, .progress = "tk")
+```
+
+```{r}
+#Graphical progress bar, powered by Windows.
+help(progress_win)
+
+if(exists("winProgressBar")) {
+l_ply(1:100000, identity, .progress = "win")
+l_ply(1:100000, identity, .progress = progress_win(title="Working.."))
+}
+```
+
+```{r}
+#Replicate expression and return results in a array.
+help(raply)
+
+raply(10, runif(4))
+raply(100, mean(runif(100)))
+```
+
+```{r}
+#Replicate expression and return results in a data frame.
+help(rdply)
+
+help(runif)
+
+rdply(20, mean(runif(100)))
+rdply(200, each(mean, var)(runif(100)))
+```
+
+```{r}
+#Replicate expression and return results in a list.
+help(rlply)
+
+rlply(10, runif(4))
+rlply(100, mean(runif(100)))
+```
+
+```{r}
+#Replicate expression and discard results.
+help(r_ply)
+
+r_ply(10, plot(runif(50)))
+r_ply(25, hist(runif(1000)))
+```
+
+```{r}
+#Combine data.frames by row, filling in missing columns.
+help(rbind.fill)
+
+mtcars
+
+mtcars[c("mpg", "wt")]
+
+rbind.fill(mtcars[c("mpg", "wt")], mtcars[c("wt", "cyl")])
+```
+
+```{r}
+#Bind matrices by row, and fill missing columns with NA.
+help(rbind.fill.matrix)
+
+A <- matrix (1:4, 2)
+B <- matrix (6:11, 2)
+A
+B
+#rbind.fill.matrix (A, B)
+
+colnames (A) <- c (3, 1)
+
+A
+
+rbind.fill.matrix (A, B)
+
+rbind.fill.matrix (B, A)
+```
+
+```{r}
+#Modify names by name, not position.
+help(rename)
+
+x <- c("a" = 1, "b" = 2, "d" = 3, 4)
+x
+
+# Rename column d to "c", updating the variable "x" with the result
+x <- rename(x, replace = c("d" = "c"))
+x
+
+# Rename column "disp" to "displacement"
+mtcars
+rename(mtcars, c("disp" = "displacement"))
+```
+
+```{r}
+#Replace specified values with new values, in a factor or character vector.
+help(revalue)
+
+x <- c("a", "b", "c")
+x
+
+revalue(x, c(a = "A", c = "C"))
+revalue(x, c("a" = "A", "c" = "C"))
+
+y <- factor(c("a", "b", "c", "a"))
+y
+revalue(y, c(a = "A", c = "C"))
+```
+
+```{r}
+#Round to multiple of any number.
+help(round_any)
+
+round_any(135, 10)
+round_any(135, 100)
+round_any(135, 25)
+
+round_any(135, 10, floor)
+round_any(135, 10, ceiling)
+round_any(135, 100, floor)
+round_any(135, 100, ceiling)
+round_any(135, 25, floor)
+round_any(135, 25, ceiling)
+```
+
+```{r}
+#‘Splat’ arguments to a function.
+help(splat)
+
+mtcars["hp"]/mtcars["cyl"]
+
+hp_per_cyl <- function(hp, cyl, ...) hp / cyl
+
+splat(hp_per_cyl)(mtcars[1,])
+splat(hp_per_cyl)(mtcars)
+```
+
+```{r}
+#Remove splitting variables from a data frame.
+help(strip_splits)
+
+mtcars
+
+dlply(mtcars, c("vs", "am"))
+dlply(mtcars, c("vs", "am"), strip_splits)
+```
+
+```{r}
+#Summarise a data frame.
+help(summarise)
+
+# Let's extract the number of teams and total period of time
+# covered by the baseball dataframe
+baseball
+
+summarise(baseball, duration = max(year) - min(year), nteams = length(unique(team)))
+
+# Combine with ddply to do that for each separate id
+ddply(baseball, "id", summarise, duration = max(year) - min(year), nteams = length(unique(team)))
+```
+
+```{r}
+#Take a subset along an selected dimension
+help(take)
+
+x <- array(seq_len(3 * 4 * 5), c(3, 4, 5))
+
+x
+
+take(x, 1, 3)
+take(x, 2, 3)
+take(x, 2, 1, drop = TRUE)
+take(x, 1, 1, drop = TRUE)
+```
+
+```{r}
+#Vector aggregate.
+help(vaggregate)
+
+# Some examples of use borrowed from ?tapply
+n <- 17
+fac <- factor(rep(1:3, length.out = n), levels = 1:5)
+
+table(fac)
+vaggregate(1:n, fac, sum)
+vaggregate(1:n, fac, quantile)
+```
+
+######################--SON--#################
+
+
+
+
+
+
+
+
